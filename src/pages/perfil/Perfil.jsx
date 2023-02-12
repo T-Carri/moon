@@ -33,6 +33,9 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import ChatIcon from '@mui/icons-material/Chat';
+import { db } from '../../firebase/firebase';
+import { collection, setDoc, addDoc, query, onSnapshot } from 'firebase/firestore';
+import { useRef } from 'react';
 const theme = createTheme({
     palette: {
       primary: {
@@ -46,8 +49,9 @@ export const Perfil = () => {
   
   
 
+const comentarioRef=useRef(null)
 
-        const {logout}= UserAuth();
+        const {logout, user}= UserAuth();
         const navigate = useNavigate();
         
       
@@ -83,14 +87,15 @@ export const Perfil = () => {
           const [open, setOpen] = useState(false);
           const [position, setPosition] = useState({ x: 0, y: 0 });
 
-          const [inputText, setInputText] = useState('Haz clic aquí para ver el tooltip');
+          const [inputText, setInputText] = useState();
           
           const [showTooltip, setShowTooltip] = useState(false);
 
 
         console.log(open)
-          const handleClickOpen  = () => {
+          const handleClickOpen  = (event) => {
             setOpen(!open);
+            setPosition({ x: event.clientX, y: event.clientY });
           };
         
           const handleClose = () => {
@@ -114,9 +119,40 @@ export const Perfil = () => {
           }, [showTooltip]);
         
 
+const postea=async()=>{
+    const q=await addDoc(collection(db, 'comentarios'), 
+    {
+        autor: user.email,
+        comentario: comentarioRef.current.value,
+        x: position.x,
+        y: position.y, 
+    })
+    
+} 
 
 
+const getComentarios =async()=>{
+    const q = query(collection(db, 'comentarios'))
+    await onSnapshot(q, (query)=>{
+       const data=[]
+       query.forEach((doc)=>{
+        data.push(doc.data())
+       
+      }) 
+      setInputText(data)
+          })}  
 
+
+          useEffect(()=>{
+            if(!inputText){
+                getComentarios()
+            }
+          
+           
+          },[inputText])
+          console.log(inputText)
+console.log(user.email)
+console.log(position)
           
           const handleAccept = () => {
             setOpen(false);
@@ -196,26 +232,34 @@ export const Perfil = () => {
             type="email"
             fullWidth
             variant="standard"
-            onChange={handleInputChange}
+           
+            inputRef={comentarioRef}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleAccept}>Subscribe</Button>
+          <Button onClick={postea}>Subscribe</Button>
         </DialogActions>
       </Dialog>
-      {showTooltip && (
-        <Tooltip
-        title={inputText}
-        style={{
-          position: 'absolute',
-          left: position.x,
-          top: position.y,
-        }}
-      >
-     <ChatIcon/>
-        </Tooltip>
-      )}
+
+
+
+
+
+      {inputText && inputText.map((e)=>{
+return( <Tooltip
+    title={`${e.autor} dice ${e.comentario}`}
+    style={{
+      position: 'absolute',
+      left: e.x,
+      top: e.y,
+    }}
+  >
+ <ChatIcon/>
+    </Tooltip>)
+       
+
+ }) }
   
           
 
