@@ -78,10 +78,14 @@ export const Perfil = () => {
     
     
     
+        
+        
           const [open, setOpen] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [inputText, setInputText] = useState('Haz clic aquí para ver el tooltip');
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+          const [position, setPosition] = useState({ x: 0, y: 0 });
+
+          const [inputText, setInputText] = useState('Haz clic aquí para ver el tooltip');
+          
+          const [showTooltip, setShowTooltip] = useState(false);
 
 
         console.log(open)
@@ -94,7 +98,7 @@ export const Perfil = () => {
           };
        
           const handleClick = (event) => {
-            setShowTooltip(!showTooltip);
+            setShowTooltip(true);
             setPosition({ x: event.clientX, y: event.clientY });
           };
         
@@ -117,10 +121,12 @@ export const Perfil = () => {
           const handleAccept = () => {
             setOpen(false);
             setShowTooltip(true);
+            console.log(position)
           };
         
           const handleInputChange = (event) => {
             setInputText(event.target.value);
+            console.log(inputText)
           }; 
   
   
@@ -195,7 +201,7 @@ export const Perfil = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Subscribe</Button>
+          <Button onClick={handleAccept}>Subscribe</Button>
         </DialogActions>
       </Dialog>
       {showTooltip && (
